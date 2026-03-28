@@ -51,12 +51,16 @@ class Qwen3Attention(nn.Module):
             hidden_size,
             bias=False,
         )
+        if isinstance(rope_scaling, dict):
+    # 对于 Qwen3 0.6B，通常取其 "type" 字段，或者如果引擎不支持 mrope，设为 None
+            rope_scaling = rope_scaling.get("type", None)
+
         self.rotary_emb = get_rope(
             self.head_dim,
             rotary_dim=self.head_dim,
             max_position=max_position,
             base=rope_theta,
-            rope_scaling=rope_scaling,
+            rope_scaling=rope_scaling, # 此时传入的是字符串或 None，是可哈希的
         )
         self.attn = Attention(
             self.num_heads,
